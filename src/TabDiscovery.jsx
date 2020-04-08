@@ -38,7 +38,8 @@ class TabDiscovery extends PureComponent {
             this.setState({completed: true, count: iCount, newValue})
 
             // remove from storage
-            localStorage.removeItem (launchId);
+            // localStorage.removeItem (launchId);
+
             // close ag builder window 
             this.builderWindow.close()
         }
