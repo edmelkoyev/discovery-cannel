@@ -4,7 +4,7 @@ class TabDiscovery extends PureComponent {
     constructor (props) {
         super(props)
         
-        this.state = {count: 0};
+        this.state = {count: 0, tabCommunucation: undefined};
         this.handleStorageEvent = this.handleStorageEvent.bind(this)
         this.handleAgBulderWindow = this.handleAgBulderWindow.bind(this)
     }
@@ -35,33 +35,55 @@ class TabDiscovery extends PureComponent {
 
         if (key === launchId){
             const iCount = count + 1
-            this.setState({completed: true, count: iCount, newValue})
+            const tabCommunucationData = JSON.parse(newValue)
+            console.log(tabCommunucationData)
+            this.setState({completed: true, count: iCount, tabCommunucationData})
+
 
             // remove from storage
             // localStorage.removeItem (launchId);
 
             // close ag builder window 
-            this.builderWindow.close()
+            if (tabCommunucationData.status === 'cancel' || tabCommunucationData.status === 'ok'){
+                this.builderWindow.close()
+            }
         }
     }
 
     handleAgBulderWindow(){
         const { launchId } = this.state
+        localStorage[launchId] = JSON.stringify({status: 'initial'})
         this.builderWindow = window.open(`/?launchId=${launchId}#builder`, "AG_BUILDER")
     }
 
     render () {
+        const {
+            tabCommunucation
+        } = this.state
+
         return (
             <>
             <h2>WAS AG Discovery Application</h2>
+            <hr />
 
-            <button onClick={this.handleAgBulderWindow}>open AG Builder</button>
-            {this.state.newValue && 
-                <>
-                    <hr />
-                        <div>{`New Ag Id: ${this.state.newValue}`}<hr />
-                    </div>
-                </>
+            { (!tabCommunucation || !tabCommunucation.status) &&
+                <button onClick={this.handleAgBulderWindow}>Open AG Builder</button>
+            }
+
+            {!!tabCommunucation && tabCommunucation.status === 'initial' &&
+                <div>Assessment Builder: [1] INIT</div>
+            }
+
+            {!!tabCommunucation && tabCommunucation.status === 'progress' &&
+                <div>Assessment Builder: [2] IN PROGRESS</div>
+            }
+
+            {!!tabCommunucation && tabCommunucation.status === 'cancel' &&
+                <div>Assessment Builder: [3] CANCEL</div>
+            }
+
+            {!!tabCommunucation && tabCommunucation.status === 'ok' &&
+                <div>Assessment Builder: [4] OK - `New Ag Id: ${this.state.newValue.masterAssessmentId}`}</div>
             }
         </>
         )
